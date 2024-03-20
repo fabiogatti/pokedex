@@ -1,4 +1,4 @@
-# practice
+# Interactive Pokedex
 
 ## Project setup
 ```
