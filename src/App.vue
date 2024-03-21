@@ -15,7 +15,7 @@
         @item-select="onSelect"
         @keyup.enter="searchOnEnter"
       />
-      <ToggleButton v-if="selected" class="absolute toggle z-50 top-[31.9vh] left-[9.8vh] h-[3vh] w-[7vh]" v-model="checked" onLabel="Shiny" offLabel="Regular" />
+      <ToggleButton v-show="selected" class="absolute toggle z-50 top-[31.9vh] left-[9.8vh] h-[3vh] w-[7vh]" v-model="checked" onLabel="Shiny" offLabel="Regular" />
       <div class="buttons absolute z-10 top-[63vh] left-[38.5vh] scale-110">
         <img 
           :class="[ pkmnMap[selected] == 1 ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
@@ -125,6 +125,7 @@ const extraStats = ref({
   height: 0,
   weight: 0,
 })
+const firstLoad = ref(true)
 
 const chartOptions = ref({
   plugins:{
@@ -146,7 +147,6 @@ const chartOptions = ref({
           color: 'rgba(255, 255, 255,0.5)',
           backdropColor: 'rgba(0,0,0,0)'
         }
-        //stepSize: 75
       }
   },
 })
@@ -159,6 +159,10 @@ const fadeOut = () => {
 
 const fadeIn = () => {
   tl.to('.anim',{ opacity: 1, duration:0.3 })
+  if(firstLoad.value){
+    tl.to('.toggle',{ opacity: 1, duration:0.3 },'<')
+    firstLoad.value = false
+  }  
 }
 
 const move = (direction) => {
@@ -234,6 +238,7 @@ onMounted(() => {
   tl.to('.rightF',{ x: '105%', y:'-0.5vh', duration: 0 })
   tl.to('.autoC',{ x: '69%', opacity: 0, duration: 0 })
   tl.to('.buttons',{ x: '280%' , opacity: 0, duration: 0 })
+  tl.to('.toggle',{ opacity: 0, duration: 0 })
 })
 
 const openDex = () => {
