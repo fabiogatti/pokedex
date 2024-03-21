@@ -13,7 +13,9 @@
         forceSelection  
         @complete="search" 
         @item-select="onSelect"
+        @keyup.enter="searchOnEnter"
       />
+      <ToggleButton v-if="selected" class="absolute toggle z-50 top-[31.9vh] left-[9.8vh] h-[3vh] w-[7vh]" v-model="checked" onLabel="Shiny" offLabel="Regular" />
       <div class="buttons absolute z-10 top-[63vh] left-[38.5vh] scale-110">
         <img 
           :class="[ pkmnMap[selected] == 1 ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
@@ -38,11 +40,20 @@
       <div class="absolute top-[30.6vh] left-[8.7vh] h-[21.5vh] w-[33.5vh] z-20">
         <div class="flex items-center justify-center w-full h-full opac">
           <img
+            v-show="!checked"
             :class="[ selected === null ? 'cursor-default' : 'cursor-pointer' ]"
             class="img anim opacity-0"
-            @load="onImgLoad"
+            @load="onImgLoad(false)"
             @click="playCry"
             :src="pokemonImage"
+          >
+          <img
+            v-show="checked"
+            :class="[ selected === null ? 'cursor-default' : 'cursor-pointer' ]"
+            class="img anim opacity-0"
+            @load="onImgLoad(true)"
+            @click="playCry"
+            :src="pokemonImageShiny"
           >
         </div>
       </div>
@@ -55,8 +66,13 @@
 
       <div 
         :class="{ 'hidden': selected == null }"
-        class="anim absolute flex items-center top-[23.5vh] left-[55.5vh] h-[47.4vh] w-[37vh] z-50">
+        class="anim absolute flex flex-col items-center top-[23.5vh] left-[55.5vh] h-[47.4vh] w-[37vh] z-50 justify-around">
         <Radar :data="datachart" :options="chartOptions" :key="sum" />
+        <div class="flex flex-row w-[35vh] justify-around text-[2vh]" style="color:white">
+          <p>Height: <span style="color:#E15F80">{{ extraStats.height/10 }}m</span></p>
+          <p>Weight: <span style="color:#E15F80">{{ extraStats.weight/10 }}kg</span></p>
+        </div>
+        
       </div>
       
 
@@ -74,6 +90,7 @@
 
 <script setup>
 import AutoComplete from 'primevue/autocomplete'
+import ToggleButton from 'primevue/togglebutton'
 import {
   Chart,
   RadialLinearScale,
@@ -103,6 +120,11 @@ const pkmnMap = ref({})
 const types = ref([])
 const cry = ref('')
 const sum = ref(0)
+const checked = ref(false)
+const extraStats = ref({ 
+  height: 0,
+  weight: 0,
+})
 
 const chartOptions = ref({
   plugins:{
@@ -157,6 +179,13 @@ const move = (direction) => {
 
 }
 
+const searchOnEnter = () => {
+  if( pokemonNames.value.find(poke => poke.toLowerCase() === textValue.value)){
+    onSelect()
+  }
+  return
+}
+
 const playCry = () => {
   let beat = new Audio(cry.value)
   beat.play()
@@ -178,13 +207,19 @@ const onSelect = () => {
     fetch(`https://pokeapi.co/api/v2/pokemon/${selected.value}/`).then(async resp => {
       let response = await resp.json()
       types.value = response.types
+      extraStats.value.weight = response.weight
+      extraStats.value.height = response.height
       dataPoints.value = response.stats.map( stat => stat.base_stat )
       cry.value = response.cries['latest']
     })
   }, 300);
 }
 
-const onImgLoad = () => fadeIn()
+const onImgLoad = (isShiny) => {
+  if(isShiny == checked.value)
+    fadeIn()
+}
+
 
 onMounted(() => {
   fetch('https://pokeapi.co/api/v2/pokemon?limit=151').then(async (res) => {
@@ -223,7 +258,17 @@ const pokemonNames = computed(() => {
 const pokemonImage = computed(() => {
   if(selected.value == null)
     return ''
-  return selected.value.includes('mime') ?  `https://projectpokemon.org/images/normal-sprite/${selected.value.replace('-','.')}.gif` : `https://projectpokemon.org/images/normal-sprite/${selected.value.replace('-','_')}.gif`
+  return selected.value.includes('mime') ?  
+  `https://projectpokemon.org/images/normal-sprite/${selected.value.replace('-','.')}.gif` : 
+  `https://projectpokemon.org/images/normal-sprite/${selected.value.replace('-','_')}.gif`
+})
+
+const pokemonImageShiny = computed(() => {
+  if(selected.value == null)
+    return ''
+  return selected.value.includes('mime') ?  
+  `https://projectpokemon.org/images/shiny-sprite/${selected.value.replace('-','.')}.gif` : 
+  `https://projectpokemon.org/images/shiny-sprite/${selected.value.replace('-','_')}.gif`
 })
 
 const datachart = computed(() => {
@@ -297,5 +342,28 @@ body{
 .p-autocomplete-item.p-focus{
   background-color: #ffa3b1;
   color: white;
+}
+
+.toggle .p-button-label{
+  font-size: 1.5vh;
+}
+
+.p-button{
+  padding: 0;
+  transition-duration: 300ms;
+}
+
+.toggle .p-button{
+  opacity: 0.7;
+  color: white;
+  background-color: #414F6B;
+  box-shadow: 0 2px 5px darkslategray;
+}
+
+.p-highlight .p-button{
+  background-color: #DB3E68;
+  box-shadow: 
+    inset 3px 3px 7px 0 #890625, 
+    inset 0 0 1px 1px #890625
 }
 </style>
