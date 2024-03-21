@@ -18,7 +18,7 @@
       <ToggleButton v-show="selected" class="absolute toggle z-50 top-[31.9vh] left-[9.8vh] h-[3vh] w-[7vh]" v-model="checked" onLabel="Shiny" offLabel="Regular" />
       <div class="buttons absolute z-10 top-[63vh] left-[38.5vh] scale-110">
         <img 
-          :class="[ pkmnMap[selected] == 1 ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
+          :class="[ pkmnMap[selected] === 1 || selected === null ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
           class="top h-[3vh]" 
           ref="top" 
           alt="top arrow" 
@@ -26,7 +26,7 @@
           @click="move('up')"
         >
         <img 
-          :class="[ pkmnMap[selected] == 151 ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
+          :class="[ pkmnMap[selected] == 151 || selected === null ? 'opacity-50 cursor-default' : 'opacity-100 cursor-pointer']" 
           class="bottom mt-[1vh] h-[3vh]" 
           ref="bottom" 
           alt="bottom arrow" 
