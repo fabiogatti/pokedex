@@ -272,7 +272,7 @@ const pokemonImageShiny = computed(() => {
   if(selected.value == null)
     return ''
   return selected.value.includes('mime') ?  
-  `https://projectpokemon.org/images/shiny-sprite/${selected.value.replace('-','.')}.gif` : 
+  `https://projectpokemon.org/images/shiny-sprite/${selected.value.replace('-','._')}.gif` : 
   `https://projectpokemon.org/images/shiny-sprite/${selected.value.replace('-','_')}.gif`
 })
 
